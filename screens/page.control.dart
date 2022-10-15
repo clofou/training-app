@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:training_app/screens/contact.add.dart';
+import 'package:training_app/screens/contact.list.dart';
+import 'package:training_app/screens/researh.dart';
 
 class PageControl extends StatelessWidget {
   const PageControl({super.key});
@@ -30,8 +30,8 @@ class PageControl extends StatelessWidget {
         ),
         body: const TabBarView(children: [
           AddContact(),
-          Text('Page2'),
-          Text('Page3'),
+          ContactList(),
+          TestPage(),
         ]),
       ),
     );
