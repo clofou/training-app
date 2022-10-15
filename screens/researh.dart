@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:training_app/services/my.database.dart';
 
 import '../model/user.dart';
@@ -11,27 +12,13 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
-  List<User> initialList = [];
-  Future get() async {
-    initialList = await getData();
-    print(initialList[0].name);
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    setState(() {
-      get();
-    });
-  }
+  List<String> theName = [];
 
   final controller = TextEditingController();
-  List<User> filteredList = [];
+  List<String> filteredList = [];
 
   @override
   Widget build(BuildContext context) {
-    get();
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -41,9 +28,8 @@ class _TestPageState extends State<TestPage> {
             onChanged: (value) {
               value = value.toLowerCase();
               setState(() {
-                filteredList = initialList
-                    .where(
-                        (element) => element.name.toLowerCase().contains(value))
+                filteredList = theName
+                    .where((element) => element.toLowerCase().contains(value))
                     .toList();
               });
             },
@@ -51,13 +37,45 @@ class _TestPageState extends State<TestPage> {
               border: OutlineInputBorder(),
             ),
           ),
-          if (controller.text.isEmpty)
+          if (controller.text.isEmpty && theName.isEmpty)
+            FutureBuilder<List<User>>(
+              future: getData(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  for (var i = 0; i < snapshot.data!.length; i++) {
+                    theName.add(snapshot.data![i].name);
+                  }
+                  return Expanded(
+                      child: ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(snapshot.data![index].name),
+                      );
+                    },
+                  ));
+                } else if (snapshot.hasError) {
+                  return const Center(
+                    child: Text("Aucune Donnée"),
+                  );
+                } else {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 30),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+              },
+            )
+          else if (controller.text.isEmpty && theName.isNotEmpty)
             Expanded(
                 child: ListView.builder(
-              itemCount: initialList.length,
+              itemCount: theName.length,
               itemBuilder: (context, index) {
+                print("Hello");
                 return ListTile(
-                  title: Text(initialList[index].name),
+                  title: Text(theName[index]),
                 );
               },
             ))
@@ -67,7 +85,7 @@ class _TestPageState extends State<TestPage> {
               itemCount: filteredList.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(filteredList[index].name),
+                  title: Text(filteredList[index]),
                 );
               },
             ))
@@ -76,3 +94,14 @@ class _TestPageState extends State<TestPage> {
     );
   }
 }
+/*
+Expanded(
+                child: ListView.builder(
+              itemCount: theName.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(theName[index]),
+                );
+              },
+            ))
+*/

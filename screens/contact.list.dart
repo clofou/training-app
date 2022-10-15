@@ -1,11 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:training_app/services/my.database.dart';
 
 import '../model/user.dart';
 
 class ContactList extends StatelessWidget {
   const ContactList({super.key});
+
+  Future saves(List<User> une) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> name = [];
+    for (var i = 0; i < une.length; i++) {
+      name.add(une[i].name);
+    }
+    await prefs.setStringList('name', name);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +34,7 @@ class ContactList extends StatelessWidget {
           allusers = snapshot.data!.docs
               .map((e) => User.fromJson(e.data() as Map<String, dynamic>))
               .toList();
+          saves(allusers);
           return ListView.builder(
             itemCount: allusers.length,
             itemBuilder: (context, index) {
